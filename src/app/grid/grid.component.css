@@ -1,0 +1,44 @@
+.flex-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  justify-content: space-around;
+  align-items: baseline;
+  padding: 20px;
+}
+
+.example-form {
+  min-width: 150px;
+  max-width: 500px;
+  width: 100%;
+  padding: 10px;
+}
+
+.example-full-width {
+  width: 50%;
+}
+
+
+mat-grid-tile {
+  border: 1px solid black;
+}
+
+.example-grid {
+  padding: 10px;
+}
+
+.demo-section + .demo-section {
+  margin-top: 16px;
+}
+.live-badge .mat-badge-content {
+  padding: 8px 8px; /* Adjust padding as needed */
+  font-size: 12px; /* Adjust font size as needed */
+}
+
+.badge-div {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
