@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  inject,
-  OnDestroy,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
@@ -37,7 +30,7 @@ import { interval, Subscription } from 'rxjs';
   styleUrl: './grid.component.css',
   providers: [GridService],
 })
-export class GridComponent implements OnInit, OnDestroy {
+export class GridComponent implements OnDestroy {
   private gridService = inject(GridService);
   constructor() {}
 
@@ -52,12 +45,10 @@ export class GridComponent implements OnInit, OnDestroy {
 
   private intervalSubscription?: Subscription;
 
-  response: IGridGeneratorResponse = {
+  response = signal<IGridGeneratorResponse>({
     gridContents: [],
     gridCode: 0,
-  };
-
-  ngOnInit(): void {}
+  });
 
   generateMatrix() {
     if (this.isGenerating()) {
@@ -81,8 +72,8 @@ export class GridComponent implements OnInit, OnDestroy {
     this.gridService
       .getAlphabetMatrix()
       .subscribe((response: IGridGeneratorResponse) => {
-        this.response.gridContents = response.gridContents;
-        this.flattenedMatrix.set(this.response.gridContents.flat());
+        this.response.set(response);
+        this.flattenedMatrix.set(this.response().gridContents.flat());
       });
   }
 
