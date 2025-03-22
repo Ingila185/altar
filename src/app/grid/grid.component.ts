@@ -1,4 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +17,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { GridService } from '../grid.service';
 import { IGridGeneratorResponse } from '../../interfaces/GridGeneratorResponse';
 import { CommonModule } from '@angular/common';
+import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'grid',
@@ -29,36 +37,64 @@ import { CommonModule } from '@angular/common';
   styleUrl: './grid.component.css',
   providers: [GridService],
 })
-export class GridComponent implements OnInit {
- 
+export class GridComponent implements OnInit, OnDestroy {
   private gridService = inject(GridService);
   constructor() {}
 
-  flattenedMatrix: string[] | null = null;
-  emptyGrid: string[] = Array(100).fill(' '); 
+  flattenedMatrix = signal<string[] | null>([]);
+  emptyGrid = signal<string[]>(Array(100).fill(' '));
+  isGenerating = signal<boolean>(false);
+  // Ensure computed signal always returns a non-null array
+  displayGrid = computed<string[]>(() => {
+    const matrix = this.flattenedMatrix();
+    return matrix && matrix.length > 0 ? matrix : this.emptyGrid();
+  });
 
-  
+  private intervalSubscription?: Subscription;
 
   response: IGridGeneratorResponse = {
     gridContents: [],
     gridCode: 0,
   };
 
+  ngOnInit(): void {}
 
-  ngOnInit(): void {
-   
-    console.log(this.emptyGrid);
-  }
-  generateMatrix(){
-    this.gridService.getAlphabetMatrix().subscribe((response: IGridGeneratorResponse) => {
-      this.response.gridContents = response.gridContents;
-      this.flattenedMatrix = this.response.gridContents.flat();
+  generateMatrix() {
+    if (this.isGenerating()) {
+      this.stopGeneration();
+      return;
+    }
+
+    // Start new generation
+    this.isGenerating.set(true);
+
+    // Generate initial grid immediately
+    this.updateGrid();
+
+    // Then update every second
+    this.intervalSubscription = interval(1000).subscribe(() => {
+      this.updateGrid();
     });
   }
 
+  updateGrid() {
+    this.gridService
+      .getAlphabetMatrix()
+      .subscribe((response: IGridGeneratorResponse) => {
+        this.response.gridContents = response.gridContents;
+        this.flattenedMatrix.set(this.response.gridContents.flat());
+      });
+  }
 
+  stopGeneration() {
+    if (this.intervalSubscription) {
+      this.intervalSubscription.unsubscribe();
+      this.intervalSubscription = undefined;
+    }
+    this.isGenerating.set(false);
+  }
 
+  ngOnDestroy(): void {
+    this.stopGeneration();
+  }
 }
-
-
-
