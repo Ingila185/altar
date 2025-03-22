@@ -2,22 +2,29 @@
   display: flex;
   flex-direction: row;
   gap: 5px;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: baseline;
-  padding: 20px;
+  padding: 10px;
 }
 
 .example-form {
-  min-width: 150px;
-  max-width: 500px;
+  min-width: 25%;
+  max-width: 25%;
   width: 100%;
   padding: 10px;
 }
 
 .example-full-width {
-  width: 50%;
+  width: 100%;
 }
 
+.badge-div {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
 
 mat-grid-tile {
   border: 1px solid black;
@@ -31,14 +38,15 @@ mat-grid-tile {
   margin-top: 16px;
 }
 .live-badge .mat-badge-content {
-  padding: 8px 8px; /* Adjust padding as needed */
-  font-size: 12px; /* Adjust font size as needed */
+  padding: 8px 8px;
+  font-size: 12px; 
 }
 
 .badge-div {
   display: flex;
+  flex-direction: column;
   gap: 10px;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  padding: 20px;
 }

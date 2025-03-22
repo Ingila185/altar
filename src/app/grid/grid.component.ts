@@ -1,7 +1,12 @@
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -11,12 +16,15 @@ import { GridService } from '../grid.service';
 import { IGridGeneratorResponse } from '../../interfaces/GridGeneratorResponse';
 import { CommonModule } from '@angular/common';
 import { interval, Subscription } from 'rxjs';
+import { ReactiveFormsModule } from '@angular/forms';
+import { InstantErrorStateMatcher } from '../error-state-matcher';
 
 @Component({
   selector: 'grid',
   standalone: true,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -32,7 +40,16 @@ import { interval, Subscription } from 'rxjs';
 })
 export class GridComponent implements OnDestroy {
   private gridService = inject(GridService);
-  constructor() {}
+  private fb = inject(FormBuilder);
+  matcher = new InstantErrorStateMatcher();
+
+  gridForm: FormGroup;
+
+  constructor() {
+    this.gridForm = this.fb.group({
+      baisChar: ['', [Validators.pattern(/^[a-z]$/), Validators.maxLength(1)]],
+    });
+  }
 
   flattenedMatrix = signal<string[] | null>([]);
   emptyGrid = signal<string[]>(Array(100).fill(' '));
@@ -69,12 +86,21 @@ export class GridComponent implements OnDestroy {
   }
 
   updateGrid() {
-    this.gridService
-      .getAlphabetMatrix()
-      .subscribe((response: IGridGeneratorResponse) => {
-        this.response.set(response);
-        this.flattenedMatrix.set(this.response().gridContents.flat());
-      });
+    if (this.gridForm.controls['baisChar'].value) {
+      this.gridService
+        .getAlphabetMatrix(this.gridForm.controls['baisChar'].value)
+        .subscribe((response: IGridGeneratorResponse) => {
+          this.response.set(response);
+          this.flattenedMatrix.set(this.response().gridContents.flat());
+        });
+    } else {
+      this.gridService
+        .getAlphabetMatrix()
+        .subscribe((response: IGridGeneratorResponse) => {
+          this.response.set(response);
+          this.flattenedMatrix.set(this.response().gridContents.flat());
+        });
+    }
   }
 
   stopGeneration() {
