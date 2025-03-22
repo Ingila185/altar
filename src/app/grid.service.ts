@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { IGridGeneratorResponse } from '../interfaces/GridGeneratorResponse';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -9,10 +10,10 @@ import { IGridGeneratorResponse } from '../interfaces/GridGeneratorResponse';
 export class GridService {
   private http = inject(HttpClient);
 
-  private apiUrl = 'http://localhost:3000/grid-response';
+  private readonly baseUrl = `${environment.apiUrl}/grid-response`;
 
-  getAlphabetMatrix(baisChar?: string): Observable<IGridGeneratorResponse> {
-    const url = baisChar ? `${this.apiUrl}?basisChar=${baisChar}` : this.apiUrl;
+  getAlphabetMatrix(bias?: string): Observable<IGridGeneratorResponse> {
+    const url = bias ? `${this.baseUrl}?bias=${bias}` : this.baseUrl;
     return this.http.get<IGridGeneratorResponse>(url);
   }
 }

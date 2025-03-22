@@ -93,6 +93,7 @@ export class GridComponent implements OnDestroy {
           this.response.set(response);
           this.flattenedMatrix.set(this.response().gridContents.flat());
         });
+      this.gridForm.reset(); //reset the form to prevent duplicate requests with bias
     } else {
       this.gridService
         .getAlphabetMatrix()
