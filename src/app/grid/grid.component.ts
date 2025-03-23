@@ -71,7 +71,7 @@ export class GridComponent implements OnDestroy {
   // Form initialization
   private createForm(): FormGroup {
     return this.fb.group({
-      baisChar: ['', [Validators.pattern(/^[a-z]$/), Validators.maxLength(1)]],
+      biasChar: ['', [Validators.pattern(/^[a-z]$/), Validators.maxLength(1)]],
     });
   }
 
@@ -98,7 +98,7 @@ export class GridComponent implements OnDestroy {
   }
 
   private updateGrid(): void {
-    const biasChar = this.gridForm.controls['baisChar'].value;
+    const biasChar = this.gridForm.controls['biasChar'].value;
 
     const handleResponse = (response: IGridGeneratorResponse) => {
       this.response.set(response);
