@@ -10,14 +10,14 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { NgFor } from '@angular/common';
+import { NgFor, CommonModule } from '@angular/common';
 import { MatBadgeModule } from '@angular/material/badge';
 import { GridService } from '../grid.service';
 import { IGridGeneratorResponse } from '../../interfaces/GridGeneratorResponse';
-import { CommonModule } from '@angular/common';
 import { interval, Subscription } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 import { InstantErrorStateMatcher } from '../error-state-matcher';
+import { INPUT_COOLDOWN } from '../../constants';
 
 @Component({
   selector: 'grid',
@@ -39,89 +39,100 @@ import { InstantErrorStateMatcher } from '../error-state-matcher';
   providers: [GridService],
 })
 export class GridComponent implements OnDestroy {
-  private gridService = inject(GridService);
-  private fb = inject(FormBuilder);
-  matcher = new InstantErrorStateMatcher();
-  isInputDisabled = signal<boolean>(false);
+  // Services and utilities
+  private readonly gridService = inject(GridService);
+  private readonly fb = inject(FormBuilder);
+  readonly matcher = new InstantErrorStateMatcher();
 
-  gridForm: FormGroup;
+  // Form related
+  readonly gridForm: FormGroup;
 
-  constructor() {
-    this.gridForm = this.fb.group({
-      baisChar: ['', [Validators.pattern(/^[a-z]$/), Validators.maxLength(1)]],
-    });
-  }
-
-  private startInputCooldown() {
-    // Only set the readonly flag, don't disable the control
-    this.isInputDisabled.set(true);
-
-    setTimeout(() => {
-      this.isInputDisabled.set(false);
-    }, 4000);
-  }
-  flattenedMatrix = signal<string[] | null>([]);
-  emptyGrid = signal<string[]>(Array(100).fill(' '));
-  isGenerating = signal<boolean>(false);
-  // Ensure computed signal always returns a non-null array
-  displayGrid = computed<string[]>(() => {
-    const matrix = this.flattenedMatrix();
-    return matrix && matrix.length > 0 ? matrix : this.emptyGrid();
-  });
-
+  // Signals
   private intervalSubscription?: Subscription;
-
-  response = signal<IGridGeneratorResponse>({
+  readonly isInputDisabled = signal<boolean>(false);
+  readonly flattenedMatrix = signal<string[] | null>([]);
+  readonly emptyGrid = signal<string[]>(Array(100).fill(' '));
+  readonly isGenerating = signal<boolean>(false);
+  readonly response = signal<IGridGeneratorResponse>({
     gridContents: [],
     gridCode: 0,
   });
 
-  generateMatrix() {
+  // Computed values to be used in the template
+  readonly displayGrid = computed<string[]>(() => {
+    const matrix = this.flattenedMatrix();
+    return matrix && matrix.length > 0 ? matrix : this.emptyGrid();
+  });
+
+  constructor() {
+    this.gridForm = this.createForm();
+  }
+
+  // Form initialization
+  private createForm(): FormGroup {
+    return this.fb.group({
+      baisChar: ['', [Validators.pattern(/^[a-z]$/), Validators.maxLength(1)]],
+    });
+  }
+
+  // Grid generation methods
+  generateMatrix(): void {
     if (this.isGenerating()) {
       this.stopGeneration();
       return;
     }
 
-    // Start new generation
+    this.startGeneration();
+  }
+
+  private startGeneration(): void {
     this.isGenerating.set(true);
-
-    // Generate initial grid immediately
     this.updateGrid();
+    this.startPeriodicUpdate();
+  }
 
-    // Then update every second
+  private startPeriodicUpdate(): void {
     this.intervalSubscription = interval(1000).subscribe(() => {
       this.updateGrid();
     });
   }
 
-  updateGrid() {
-    if (this.gridForm.controls['baisChar'].value) {
-      this.gridService
-        .getAlphabetMatrix(this.gridForm.controls['baisChar'].value)
-        .subscribe((response: IGridGeneratorResponse) => {
-          this.response.set(response);
-          this.flattenedMatrix.set(this.response().gridContents.flat());
-        });
-      this.startInputCooldown(); //Disable the input for 4 seconds after request
-      this.gridForm.reset(); //reset the form to prevent duplicate requests with bias
+  private updateGrid(): void {
+    const biasChar = this.gridForm.controls['baisChar'].value;
+
+    const handleResponse = (response: IGridGeneratorResponse) => {
+      this.response.set(response);
+      this.flattenedMatrix.set(response.gridContents.flat());
+    };
+
+    if (biasChar) {
+      this.gridService.getAlphabetMatrix(biasChar).subscribe(handleResponse);
+      this.handleBiasCharInput();
     } else {
-      this.gridService
-        .getAlphabetMatrix()
-        .subscribe((response: IGridGeneratorResponse) => {
-          this.response.set(response);
-          this.flattenedMatrix.set(this.response().gridContents.flat());
-        });
+      this.gridService.getAlphabetMatrix().subscribe(handleResponse);
     }
   }
 
-  stopGeneration() {
+  private handleBiasCharInput(): void {
+    this.startInputCooldown();
+    this.gridForm.reset();
+  }
+
+  private startInputCooldown(): void {
+    this.isInputDisabled.set(true);
+    setTimeout(() => {
+      this.isInputDisabled.set(false);
+    }, INPUT_COOLDOWN.COOLDOWN_TIME);
+  }
+
+  stopGeneration(): void {
     if (this.intervalSubscription) {
       this.intervalSubscription.unsubscribe();
-      this.intervalSubscription = undefined;
     }
     this.isGenerating.set(false);
   }
 
+  // Lifecycle methods
   ngOnDestroy(): void {
     this.stopGeneration();
   }
