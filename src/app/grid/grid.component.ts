@@ -42,6 +42,7 @@ export class GridComponent implements OnDestroy {
   private gridService = inject(GridService);
   private fb = inject(FormBuilder);
   matcher = new InstantErrorStateMatcher();
+  isInputDisabled = signal<boolean>(false);
 
   gridForm: FormGroup;
 
@@ -51,6 +52,14 @@ export class GridComponent implements OnDestroy {
     });
   }
 
+  private startInputCooldown() {
+    // Only set the readonly flag, don't disable the control
+    this.isInputDisabled.set(true);
+
+    setTimeout(() => {
+      this.isInputDisabled.set(false);
+    }, 4000);
+  }
   flattenedMatrix = signal<string[] | null>([]);
   emptyGrid = signal<string[]>(Array(100).fill(' '));
   isGenerating = signal<boolean>(false);
@@ -93,6 +102,7 @@ export class GridComponent implements OnDestroy {
           this.response.set(response);
           this.flattenedMatrix.set(this.response().gridContents.flat());
         });
+      this.startInputCooldown(); //Disable the input for 4 seconds after request
       this.gridForm.reset(); //reset the form to prevent duplicate requests with bias
     } else {
       this.gridService

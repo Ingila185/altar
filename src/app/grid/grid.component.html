@@ -13,7 +13,10 @@
         formControlName="baisChar"
         [errorStateMatcher]="matcher"
         maxlength="1"
+        [readonly]="isInputDisabled()"
       />
+      <mat-hint *ngIf="isInputDisabled()">Please wait 4 seconds...</mat-hint>
+
       <mat-error>Please enter a valid letter (a-z)</mat-error>
 
       @if (gridForm.get('biasChar')?.hasError('pattern') &&
