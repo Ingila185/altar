@@ -6,7 +6,7 @@ A modern Angular application that generates customizable alphabet grids with bia
 
 - Generate 10x10 grids of random lowercase letters
 - Support for bias character selection
-- Real-time grid generation
+- Real-time grid generation9
 - Responsive design
 - Input validation for bias characters
 - Error handling with typed exceptions
@@ -59,7 +59,9 @@ To generate a code coverage report:
 ng test --code-coverage
 ```
 
-The coverage report will be generated in the `coverage` directory. Currently it is approx. 97%.
+The coverage report will be generated in the `coverage` directory. You can open `coverage/index.html` in your browser to view the detailed report.
+
+![Code Coverage Report](public/codeCoverageReportSnapshot.png)
 
 ### End-to-End Tests
 
