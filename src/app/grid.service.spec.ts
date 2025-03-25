@@ -174,4 +174,76 @@ describe('GridService', () => {
     const req = httpMock.expectOne(baseUrl);
     req.error(errorResponse);
   });
+
+  it('should handle non-HTTP errors with GridApiException', () => {
+    // Mock a non-HTTP error by throwing a regular Error
+    const originalError = new Error('Test error');
+    spyOn(service as any, 'validateBias').and.throwError(originalError);
+
+    service.getAlphabetMatrix('a').subscribe({
+      error: (error: GridApiException) => {
+        expect(error).toBeInstanceOf(GridApiException);
+        expect(error.code).toBe('API_ERROR');
+        expect(error.details.originalError).toBe(originalError);
+      },
+    });
+  });
+
+  it('should handle empty string bias', () => {
+    // Mock the validation to throw error before HTTP request
+    spyOn(service as any, 'validateBias').and.throwError(
+      new GridValidationException(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION, {
+        bias: '',
+      })
+    );
+
+    service.getAlphabetMatrix('').subscribe({
+      error: (error: GridValidationException) => {
+        expect(error).toBeInstanceOf(GridValidationException);
+        expect(error.message).toBe(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION);
+        expect(error.code).toBe('VALIDATION_ERROR');
+        expect(error.details).toEqual({ bias: '' });
+      },
+    });
+  });
+
+  it('should handle null bias parameter', () => {
+    service.getAlphabetMatrix(null as any).subscribe({
+      error: (error: GridValidationException) => {
+        expect(error).toBeInstanceOf(GridValidationException);
+        expect(error.message).toBe(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION);
+        expect(error.code).toBe('VALIDATION_ERROR');
+        expect(error.details).toEqual({ bias: null });
+      },
+    });
+  });
+
+  it('should handle undefined bias parameter', () => {
+    service.getAlphabetMatrix(undefined).subscribe({
+      error: (error: GridValidationException) => {
+        expect(error).toBeInstanceOf(GridValidationException);
+        expect(error.message).toBe(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION);
+        expect(error.code).toBe('VALIDATION_ERROR');
+        expect(error.details).toEqual({ bias: undefined });
+      },
+    });
+  });
+
+  it('should handle non-letter single character bias', () => {
+    // Mock the validation to throw error before HTTP request
+    spyOn(service as any, 'validateBias').and.throwError(
+      new GridValidationException(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION, {
+        bias: '!',
+      })
+    );
+
+    service.getAlphabetMatrix('!').subscribe({
+      error: (error: GridValidationException) => {
+        expect(error).toBeInstanceOf(GridValidationException);
+        expect(error.message).toBe(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION);
+        expect(error.code).toBe('VALIDATION_ERROR');
+        expect(error.details).toEqual({ bias: '!' });
+      },
+    });
+  });
 });
