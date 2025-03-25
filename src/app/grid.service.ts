@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, catchError } from 'rxjs';
 import { IGridGeneratorResponse } from '../interfaces/GridGeneratorResponse';
 import { environment } from '../environments/environment';
 import {
@@ -15,7 +15,7 @@ import { GRID_EXCEPTIONS } from '../constants';
 export class GridService {
   private http = inject(HttpClient);
 
-  private readonly baseUrl = `${environment.apiUrl}/grid-response`;
+  private readonly baseUrl = `${environment.apiUrl}/grid`;
 
   private validateBias(bias: string): void {
     if (!bias) return;
@@ -48,13 +48,27 @@ export class GridService {
     }
   }
 
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    if (error instanceof GridValidationException) {
+      return throwError(() => error);
+    }
+    return throwError(
+      () =>
+        new GridApiException('Failed to fetch grid data', {
+          originalError: error,
+        })
+    );
+  }
+
   getAlphabetMatrix(bias?: string): Observable<IGridGeneratorResponse> {
     try {
       if (bias) {
         this.validateBias(bias);
       }
       const url = bias ? `${this.baseUrl}?bias=${bias}` : this.baseUrl;
-      return this.http.get<IGridGeneratorResponse>(url);
+      return this.http
+        .get<IGridGeneratorResponse>(url)
+        .pipe(catchError(this.handleError.bind(this)));
     } catch (error) {
       if (error instanceof GridValidationException) {
         return throwError(() => error);

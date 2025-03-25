@@ -53,8 +53,23 @@ export class GridComponent implements OnDestroy {
   readonly emptyGrid = signal<string[]>(Array(100).fill(' '));
   readonly isGenerating = signal<boolean>(false);
   readonly response = signal<IGridGeneratorResponse>({
-    gridContents: [],
-    gridCode: 0,
+    status: {
+      code: 0,
+      message: '',
+      success: false,
+    },
+    data: {
+      gridContents: [],
+      gridCode: 0,
+      metadata: {
+        dimensions: {
+          rows: 0,
+          columns: 0,
+        },
+        timestamp: '',
+        version: '',
+      },
+    },
   });
 
   // Computed values to be used in the template
@@ -103,12 +118,27 @@ export class GridComponent implements OnDestroy {
 
     const handleResponse = (response: IGridGeneratorResponse) => {
       this.response.set(response);
-      this.flattenedMatrix.set(response.gridContents.flat());
+      this.flattenedMatrix.set(response.data.gridContents.flat());
     };
 
     const handleError = (error: any) => {
       console.error('Error fetching grid:', error);
-      this.response.set({ gridContents: [], gridCode: 0 });
+      this.response.set({
+        status: {
+          code: 0,
+          message: '',
+          success: false,
+        },
+        data: {
+          gridContents: [],
+          gridCode: 0,
+          metadata: {
+            dimensions: { rows: 0, columns: 0 },
+            timestamp: '',
+            version: '',
+          },
+        },
+      });
       this.flattenedMatrix.set([]);
       this.stopGeneration();
     };

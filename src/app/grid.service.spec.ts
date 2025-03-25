@@ -6,12 +6,17 @@ import {
 } from '@angular/common/http/testing';
 import { IGridGeneratorResponse } from '../interfaces/GridGeneratorResponse';
 import { environment } from '../environments/environment';
+import {
+  GridValidationException,
+  GridApiException,
+} from './models/grid-exception.model';
 import { GRID_EXCEPTIONS } from '../constants';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('GridService', () => {
   let service: GridService;
   let httpMock: HttpTestingController;
-  const baseUrl = environment.apiUrl + '/grid-response';
+  const baseUrl = environment.apiUrl + '/grid';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -33,11 +38,26 @@ describe('GridService', () => {
 
   it('should make GET request without bias parameter', () => {
     const mockResponse: IGridGeneratorResponse = {
-      gridContents: [
-        ['a', 'b'],
-        ['c', 'd'],
-      ],
-      gridCode: 42,
+      status: {
+        code: 200,
+        message: 'OK',
+        success: true,
+      },
+      data: {
+        gridContents: [
+          ['a', 'b'],
+          ['c', 'd'],
+        ],
+        gridCode: 42,
+        metadata: {
+          dimensions: {
+            rows: 2,
+            columns: 2,
+          },
+          timestamp: '2023-01-01T00:00:00Z',
+          version: '1.0.0',
+        },
+      },
     };
 
     service.getAlphabetMatrix().subscribe((response) => {
@@ -52,11 +72,28 @@ describe('GridService', () => {
   it('should make GET request with valid bias parameter', () => {
     const biasChar = 'z';
     const mockResponse: IGridGeneratorResponse = {
-      gridContents: [
-        ['a', 'b'],
-        ['c', 'd'],
-      ],
-      gridCode: 42,
+      status: {
+        code: 200,
+        message: 'OK',
+        success: true,
+      },
+      data: {
+        gridContents: [
+          ['a', 'b'],
+          ['c', 'd'],
+        ],
+        gridCode: 42,
+        metadata: {
+          dimensions: {
+            rows: 2,
+            columns: 2,
+          },
+          biasCharacter: biasChar,
+          biasPercentage: 50,
+          timestamp: '2023-01-01T00:00:00Z',
+          version: '1.0.0',
+        },
+      },
     };
 
     service.getAlphabetMatrix(biasChar).subscribe((response) => {
@@ -68,54 +105,69 @@ describe('GridService', () => {
     req.flush(mockResponse);
   });
 
-  it('should throw error for capital letter bias', () => {
+  it('should throw GridValidationException for capital letter bias', () => {
     const biasChar = 'Z';
 
     service.getAlphabetMatrix(biasChar).subscribe({
-      error: (error) => {
+      error: (error: GridValidationException) => {
+        expect(error).toBeInstanceOf(GridValidationException);
         expect(error.message).toBe(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION);
+        expect(error.code).toBe('VALIDATION_ERROR');
+        expect(error.details).toEqual({ bias: biasChar });
       },
     });
   });
 
-  it('should throw error for numeric bias', () => {
+  it('should throw GridValidationException for numeric bias', () => {
     const biasChar = '1';
 
     service.getAlphabetMatrix(biasChar).subscribe({
-      error: (error) => {
+      error: (error: GridValidationException) => {
+        expect(error).toBeInstanceOf(GridValidationException);
         expect(error.message).toBe(GRID_EXCEPTIONS.NUMBER_EXCEPTION);
+        expect(error.code).toBe('VALIDATION_ERROR');
+        expect(error.details).toEqual({ bias: biasChar });
       },
     });
   });
 
-  it('should throw error for special character bias', () => {
+  it('should throw GridValidationException for special character bias', () => {
     const biasChar = '@';
 
     service.getAlphabetMatrix(biasChar).subscribe({
-      error: (error) => {
+      error: (error: GridValidationException) => {
+        expect(error).toBeInstanceOf(GridValidationException);
         expect(error.message).toBe(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION);
+        expect(error.code).toBe('VALIDATION_ERROR');
+        expect(error.details).toEqual({ bias: biasChar });
       },
     });
   });
 
-  it('should throw error for multiple character bias', () => {
+  it('should throw GridValidationException for multiple character bias', () => {
     const biasChar = 'ab';
 
     service.getAlphabetMatrix(biasChar).subscribe({
-      error: (error) => {
+      error: (error: GridValidationException) => {
+        expect(error).toBeInstanceOf(GridValidationException);
         expect(error.message).toBe(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION);
+        expect(error.code).toBe('VALIDATION_ERROR');
+        expect(error.details).toEqual({ bias: biasChar });
       },
     });
   });
 
-  it('should handle error response', () => {
+  it('should handle API error with GridApiException', () => {
     const errorResponse = new ErrorEvent('Network error', {
       message: 'Network error occurred',
     });
 
     service.getAlphabetMatrix().subscribe({
-      error: (error) => {
-        expect(error).toBeTruthy();
+      error: (error: GridApiException) => {
+        expect(error).toBeInstanceOf(GridApiException);
+        expect(error.code).toBe('API_ERROR');
+        expect(error.details.originalError).toBeInstanceOf(HttpErrorResponse);
+        expect(error.details.originalError.error).toBe(errorResponse);
       },
     });
 
