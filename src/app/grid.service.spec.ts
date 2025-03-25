@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { IGridGeneratorResponse } from '../interfaces/GridGeneratorResponse';
 import { environment } from '../environments/environment';
+import { GRID_EXCEPTIONS } from '../constants';
 
 describe('GridService', () => {
   let service: GridService;
@@ -48,7 +49,7 @@ describe('GridService', () => {
     req.flush(mockResponse);
   });
 
-  it('should make GET request with bias parameter', () => {
+  it('should make GET request with valid bias parameter', () => {
     const biasChar = 'z';
     const mockResponse: IGridGeneratorResponse = {
       gridContents: [
@@ -65,6 +66,46 @@ describe('GridService', () => {
     const req = httpMock.expectOne(`${baseUrl}?bias=${biasChar}`);
     expect(req.request.method).toBe('GET');
     req.flush(mockResponse);
+  });
+
+  it('should throw error for capital letter bias', () => {
+    const biasChar = 'Z';
+
+    service.getAlphabetMatrix(biasChar).subscribe({
+      error: (error) => {
+        expect(error.message).toBe(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION);
+      },
+    });
+  });
+
+  it('should throw error for numeric bias', () => {
+    const biasChar = '1';
+
+    service.getAlphabetMatrix(biasChar).subscribe({
+      error: (error) => {
+        expect(error.message).toBe(GRID_EXCEPTIONS.NUMBER_EXCEPTION);
+      },
+    });
+  });
+
+  it('should throw error for special character bias', () => {
+    const biasChar = '@';
+
+    service.getAlphabetMatrix(biasChar).subscribe({
+      error: (error) => {
+        expect(error.message).toBe(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION);
+      },
+    });
+  });
+
+  it('should throw error for multiple character bias', () => {
+    const biasChar = 'ab';
+
+    service.getAlphabetMatrix(biasChar).subscribe({
+      error: (error) => {
+        expect(error.message).toBe(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION);
+      },
+    });
   });
 
   it('should handle error response', () => {

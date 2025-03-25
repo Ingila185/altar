@@ -3,6 +3,8 @@ import {
   TestBed,
   fakeAsync,
   tick,
+  flush,
+  discardPeriodicTasks,
 } from '@angular/core/testing';
 import { GridComponent } from './grid.component';
 import { GridService } from '../grid.service';
@@ -52,7 +54,24 @@ describe('GridComponent', () => {
   });
 
   describe('Grid Generation', () => {
-    it('should handle empty response', () => {
+    it('should handle API error', fakeAsync(() => {
+      const error = new Error('API Error');
+      gridService.getAlphabetMatrix.and.returnValue(throwError(() => error));
+
+      // Subscribe to the error case
+      component.generateMatrix();
+
+      // Flush all pending async operations
+      flush();
+
+      // Verify the component state after error
+      expect(component.response().gridCode).toBe(0);
+      expect(component.displayGrid()).toEqual(component.emptyGrid());
+      expect(component.isGenerating()).toBeFalse();
+      discardPeriodicTasks();
+    }));
+
+    it('should handle empty response', fakeAsync(() => {
       const emptyResponse: IGridGeneratorResponse = {
         gridContents: [],
         gridCode: 0,
@@ -61,28 +80,74 @@ describe('GridComponent', () => {
 
       component.generateMatrix();
 
+      // Flush all pending async operations
+      flush();
+
       expect(component.response()).toEqual(emptyResponse);
       expect(component.displayGrid()).toEqual(component.emptyGrid());
-    });
+      discardPeriodicTasks();
+    }));
 
-    it('should handle API error', () => {
-      const error = new Error('API Error');
-      gridService.getAlphabetMatrix.and.returnValue(throwError(() => error));
-
-      component.generateMatrix();
-
-      expect(component.response().gridCode).toBe(0);
-      expect(component.displayGrid()).toEqual(component.emptyGrid());
-    });
-
-    it('should toggle generation state', () => {
+    it('should toggle generation state', fakeAsync(() => {
       expect(component.isGenerating()).toBeFalse();
 
       component.generateMatrix();
+      flush();
       expect(component.isGenerating()).toBeTrue();
 
       component.generateMatrix();
+      flush();
       expect(component.isGenerating()).toBeFalse();
+    }));
+
+    it('should call getAlphabetMatrix without parameters when no bias is provided', fakeAsync(() => {
+      // Reset the spy call count
+      gridService.getAlphabetMatrix.calls.reset();
+
+      // Start generation
+      component.generateMatrix();
+
+      // Flush all pending async operations
+      flush();
+
+      // Verify the service was called without parameters
+      expect(gridService.getAlphabetMatrix).toHaveBeenCalledWith();
+
+      // Wait for the interval subscription
+      tick(1000);
+
+      // Clean up timers
+      discardPeriodicTasks();
+    }));
+
+    it('should call getAlphabetMatrix with bias parameter when bias is provided', fakeAsync(() => {
+      // Reset the spy call count
+      gridService.getAlphabetMatrix.calls.reset();
+
+      // Set bias character
+      const biasChar = 'z';
+      component.gridForm.patchValue({ biasChar });
+      fixture.detectChanges();
+
+      // Start generation
+      component.generateMatrix();
+
+      // Flush all pending async operations
+      flush();
+
+      // Verify the service was called with bias parameter
+      expect(gridService.getAlphabetMatrix).toHaveBeenCalledWith(biasChar);
+
+      // Wait for the interval subscription
+      tick(1000);
+
+      // Clean up timers
+      discardPeriodicTasks();
+    }));
+
+    afterEach(() => {
+      // Stop generation to clean up interval subscription
+      component.stopGeneration();
     });
   });
 });

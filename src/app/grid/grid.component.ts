@@ -17,7 +17,7 @@ import { IGridGeneratorResponse } from '../../interfaces/GridGeneratorResponse';
 import { interval, Subscription } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 import { InstantErrorStateMatcher } from '../error-state-matcher';
-import { INPUT_COOLDOWN } from '../../constants';
+import { INTERVALS } from '../../constants';
 
 @Component({
   selector: 'grid',
@@ -36,7 +36,6 @@ import { INPUT_COOLDOWN } from '../../constants';
   ],
   templateUrl: './grid.component.html',
   styleUrl: './grid.component.css',
-  providers: [GridService],
 })
 export class GridComponent implements OnDestroy {
   // Services and utilities
@@ -76,7 +75,7 @@ export class GridComponent implements OnDestroy {
   }
 
   // Grid generation methods
-  generateMatrix(): void {
+  public generateMatrix(): void {
     if (this.isGenerating()) {
       this.stopGeneration();
       return;
@@ -92,9 +91,11 @@ export class GridComponent implements OnDestroy {
   }
 
   private startPeriodicUpdate(): void {
-    this.intervalSubscription = interval(1000).subscribe(() => {
-      this.updateGrid();
-    });
+    this.intervalSubscription = interval(INTERVALS.UPDATE_INTERVAL).subscribe(
+      () => {
+        this.updateGrid();
+      }
+    );
   }
 
   private updateGrid(): void {
@@ -105,11 +106,24 @@ export class GridComponent implements OnDestroy {
       this.flattenedMatrix.set(response.gridContents.flat());
     };
 
+    const handleError = (error: any) => {
+      console.error('Error fetching grid:', error);
+      this.response.set({ gridContents: [], gridCode: 0 });
+      this.flattenedMatrix.set([]);
+      this.stopGeneration();
+    };
+
     if (biasChar) {
-      this.gridService.getAlphabetMatrix(biasChar).subscribe(handleResponse);
+      this.gridService.getAlphabetMatrix(biasChar).subscribe({
+        next: handleResponse,
+        error: handleError,
+      });
       this.handleBiasCharInput();
     } else {
-      this.gridService.getAlphabetMatrix().subscribe(handleResponse);
+      this.gridService.getAlphabetMatrix().subscribe({
+        next: handleResponse,
+        error: handleError,
+      });
     }
   }
 
@@ -122,7 +136,7 @@ export class GridComponent implements OnDestroy {
     this.isInputDisabled.set(true);
     setTimeout(() => {
       this.isInputDisabled.set(false);
-    }, INPUT_COOLDOWN.COOLDOWN_TIME);
+    }, INTERVALS.COOLDOWN_TIME);
   }
 
   stopGeneration(): void {
