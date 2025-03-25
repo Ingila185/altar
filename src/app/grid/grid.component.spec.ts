@@ -16,7 +16,7 @@ import {
   GridValidationException,
   GridApiException,
 } from '../models/grid-exception.model';
-import { GRID_EXCEPTIONS } from '../../constants';
+import { BIAS_VALIDATION_ERRORS } from '../../constants';
 
 describe('GridComponent', () => {
   let component: GridComponent;
@@ -91,7 +91,7 @@ describe('GridComponent', () => {
 
     it('should handle validation error', fakeAsync(() => {
       const error = new GridValidationException(
-        GRID_EXCEPTIONS.UPPERCASE_EXCEPTION,
+        BIAS_VALIDATION_ERRORS.UPPERCASE_EXCEPTION,
         {
           bias: 'Z',
         }

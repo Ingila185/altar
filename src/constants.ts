@@ -7,9 +7,10 @@ export enum INTERVALS {
   UPDATE_INTERVAL = 1000,
 }
 
-export enum GRID_EXCEPTIONS {
+export enum BIAS_VALIDATION_ERRORS {
   SINGLE_CHARACTER_EXCEPTION = 'Bias must be a single character',
   UPPERCASE_EXCEPTION = 'Bias must be a lowercase letter',
   NUMBER_EXCEPTION = 'Bias must be a letter',
   INVALID_BIAS_EXCEPTION = 'Invalid bias',
+  EMPTY_EXCEPTION = 'Bias cannot be empty',
 }

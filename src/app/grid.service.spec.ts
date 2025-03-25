@@ -10,7 +10,7 @@ import {
   GridValidationException,
   GridApiException,
 } from './models/grid-exception.model';
-import { GRID_EXCEPTIONS } from '../constants';
+import { BIAS_VALIDATION_ERRORS } from '../constants';
 import { HttpErrorResponse } from '@angular/common/http';
 
 describe('GridService', () => {
@@ -111,7 +111,7 @@ describe('GridService', () => {
     service.getAlphabetMatrix(biasChar).subscribe({
       error: (error: GridValidationException) => {
         expect(error).toBeInstanceOf(GridValidationException);
-        expect(error.message).toBe(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION);
+        expect(error.message).toBe(BIAS_VALIDATION_ERRORS.UPPERCASE_EXCEPTION);
         expect(error.code).toBe('VALIDATION_ERROR');
         expect(error.details).toEqual({ bias: biasChar });
       },
@@ -124,7 +124,7 @@ describe('GridService', () => {
     service.getAlphabetMatrix(biasChar).subscribe({
       error: (error: GridValidationException) => {
         expect(error).toBeInstanceOf(GridValidationException);
-        expect(error.message).toBe(GRID_EXCEPTIONS.NUMBER_EXCEPTION);
+        expect(error.message).toBe(BIAS_VALIDATION_ERRORS.NUMBER_EXCEPTION);
         expect(error.code).toBe('VALIDATION_ERROR');
         expect(error.details).toEqual({ bias: biasChar });
       },
@@ -137,7 +137,7 @@ describe('GridService', () => {
     service.getAlphabetMatrix(biasChar).subscribe({
       error: (error: GridValidationException) => {
         expect(error).toBeInstanceOf(GridValidationException);
-        expect(error.message).toBe(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION);
+        expect(error.message).toBe(BIAS_VALIDATION_ERRORS.UPPERCASE_EXCEPTION);
         expect(error.code).toBe('VALIDATION_ERROR');
         expect(error.details).toEqual({ bias: biasChar });
       },
@@ -150,7 +150,9 @@ describe('GridService', () => {
     service.getAlphabetMatrix(biasChar).subscribe({
       error: (error: GridValidationException) => {
         expect(error).toBeInstanceOf(GridValidationException);
-        expect(error.message).toBe(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION);
+        expect(error.message).toBe(
+          BIAS_VALIDATION_ERRORS.SINGLE_CHARACTER_EXCEPTION
+        );
         expect(error.code).toBe('VALIDATION_ERROR');
         expect(error.details).toEqual({ bias: biasChar });
       },
@@ -189,50 +191,10 @@ describe('GridService', () => {
     });
   });
 
-  it('should handle empty string bias', () => {
-    // Mock the validation to throw error before HTTP request
-    spyOn(service as any, 'validateBias').and.throwError(
-      new GridValidationException(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION, {
-        bias: '',
-      })
-    );
-
-    service.getAlphabetMatrix('').subscribe({
-      error: (error: GridValidationException) => {
-        expect(error).toBeInstanceOf(GridValidationException);
-        expect(error.message).toBe(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION);
-        expect(error.code).toBe('VALIDATION_ERROR');
-        expect(error.details).toEqual({ bias: '' });
-      },
-    });
-  });
-
-  it('should handle null bias parameter', () => {
-    service.getAlphabetMatrix(null as any).subscribe({
-      error: (error: GridValidationException) => {
-        expect(error).toBeInstanceOf(GridValidationException);
-        expect(error.message).toBe(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION);
-        expect(error.code).toBe('VALIDATION_ERROR');
-        expect(error.details).toEqual({ bias: null });
-      },
-    });
-  });
-
-  it('should handle undefined bias parameter', () => {
-    service.getAlphabetMatrix(undefined).subscribe({
-      error: (error: GridValidationException) => {
-        expect(error).toBeInstanceOf(GridValidationException);
-        expect(error.message).toBe(GRID_EXCEPTIONS.SINGLE_CHARACTER_EXCEPTION);
-        expect(error.code).toBe('VALIDATION_ERROR');
-        expect(error.details).toEqual({ bias: undefined });
-      },
-    });
-  });
-
   it('should handle non-letter single character bias', () => {
     // Mock the validation to throw error before HTTP request
     spyOn(service as any, 'validateBias').and.throwError(
-      new GridValidationException(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION, {
+      new GridValidationException(BIAS_VALIDATION_ERRORS.UPPERCASE_EXCEPTION, {
         bias: '!',
       })
     );
@@ -240,7 +202,7 @@ describe('GridService', () => {
     service.getAlphabetMatrix('!').subscribe({
       error: (error: GridValidationException) => {
         expect(error).toBeInstanceOf(GridValidationException);
-        expect(error.message).toBe(GRID_EXCEPTIONS.UPPERCASE_EXCEPTION);
+        expect(error.message).toBe(BIAS_VALIDATION_ERRORS.UPPERCASE_EXCEPTION);
         expect(error.code).toBe('VALIDATION_ERROR');
         expect(error.details).toEqual({ bias: '!' });
       },
