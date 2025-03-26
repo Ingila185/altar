@@ -1,27 +1,126 @@
-# GridGenerator
+# Grid Generator
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.7.
+A modern Angular application that generates customizable alphabet grids with bias character support. This application allows users to create and visualize grids of random lowercase letters with the option to bias the generation towards specific characters.
 
-## Development server
+## Features
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- Generate 10x10 grids of random lowercase letters
+- Support for bias character selection
+- Real-time grid generation9
+- Responsive design
+- Input validation for bias characters
+- Error handling with typed exceptions
+- Comprehensive unit test coverage
 
-## Code scaffolding
+## Prerequisites
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Node.js (v18 or higher)
+- npm (v9 or higher)
+- Angular CLI (v18.2.7 or higher)
 
-## Build
+## Installation
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+1. Clone the repository:
 
-## Running unit tests
+```bash
+git clone <repository-url>
+cd grid-generator
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+2. Install dependencies:
 
-## Running end-to-end tests
+```bash
+npm install
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Development
 
-## Further help
+Run the development server:
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```bash
+ng serve
+```
+
+Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+
+## Testing
+
+### Unit Tests
+
+Run the unit tests:
+
+```bash
+ng test
+```
+
+To generate a code coverage report:
+
+```bash
+ng test --code-coverage
+```
+
+The coverage report will be generated in the `coverage` directory. You can open `coverage/index.html` in your browser to view the detailed report.
+
+![Code Coverage Report](public/codeCoverageReportSnapshot.png)
+
+### End-to-End Tests
+
+Run the end-to-end tests:
+
+```bash
+ng e2e
+```
+
+## Project Structure
+
+```
+grid-generator/
+├── src/
+│   ├── app/
+│   │   ├── grid/                 # Grid component and related files
+│   │   │   ├── grid.component.ts
+│   │   │   ├── grid.component.html
+│   │   │   └── grid.component.css
+│   │   │
+│   │   │   ├── models/              # Data models and interfaces
+│   │   │   └── services/            # Application services
+│   │   └── constants/           # Application constants
+│   │
+│   ├── assets/                  # Static assets
+│   └── environments/            # Environment configurations
+│
+├── tests/                       # Test files
+└── angular.json                 # Angular configuration
+```
+
+## API Integration
+
+The application integrates with a backend API that provides grid generation functionality. The API endpoint is configured in the environment files:
+
+- Development: `http://localhost:3000/grid`
+- Production: Configure in `environment.prod.ts`
+
+## Error Handling
+
+The application implements a robust error handling system with typed exceptions:
+
+- `GridValidationException`: For input validation errors
+- `GridApiException`: For API-related errors
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Built with [Angular](https://angular.io/)
+- Testing powered by [Karma](https://karma-runner.github.io/) and [Jasmine](https://jasmine.github.io/)
+- Styling with modern CSS

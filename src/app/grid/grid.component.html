@@ -1,40 +1,77 @@
-<div class="flex-grid">
-  <form class="example-form">
-    <mat-form-field class="example-full-width" appearance="outline">
-      <mat-label>Bais Character</mat-label>
-      <input matInput placeholder="Bais character e.g. a" value="" />
+<div class="grid-container">
+  <div class="controls-section">
+    <form
+      [formGroup]="gridForm"
+      (ngSubmit)="generateMatrix()"
+      class="form-wrapper"
+    >
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Bias Character</mat-label>
+        <input
+          matInput
+          placeholder="Bias character e.g. a"
+          formControlName="biasChar"
+          [errorStateMatcher]="matcher"
+          maxlength="1"
+          [readonly]="isInputDisabled()"
+        />
+        <mat-hint *ngIf="isInputDisabled()" class="wait-hint">
+          Please wait 4 seconds...
+        </mat-hint>
+
+        <mat-error>Please enter a valid letter (a-z)</mat-error>
+        @if (gridForm.get('biasChar')?.hasError('pattern') &&
+        gridForm.get('biasChar')?.touched) {
+        <mat-error>Please enter a valid letter (a-z)</mat-error>
+        } @if (gridForm.get('biasChar')?.hasError('maxlength')) {
+        <mat-error>Only one character allowed</mat-error>
+        }
+      </mat-form-field>
+    </form>
+
+    <div class="action-section">
+      <mat-icon
+        class="timer-icon"
+        aria-hidden="false"
+        aria-label="Clock icon"
+        fontIcon="schedule"
+      ></mat-icon>
+
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="generateMatrix()"
+        [disabled]="!gridForm.valid"
+      >
+        {{ isGenerating() ? "Stop" : "Start" }} Generation
+      </button>
+    </div>
+  </div>
+
+  <div class="grid-display">
+    <mat-grid-list cols="10" rowHeight="50px">
+      @for (cell of (displayGrid()); track $index) {
+      <mat-grid-tile class="grid-cell">
+        {{ cell }}
+      </mat-grid-tile>
+      }
+    </mat-grid-list>
+  </div>
+
+  <div class="badge-section">
+    <span
+      matBadge="Live"
+      matBadgeColor="warn"
+      matBadgePosition="before"
+      class="live-badge"
+      matBadgeSize="medium"
+      matBadgeOverlap="false"
+    >
+    </span>
+
+    <mat-form-field appearance="outline" class="code-input">
+      <mat-label>Your Code</mat-label>
+      <input matInput [value]="response().data.gridCode" readonly />
     </mat-form-field>
-  </form>
-  <mat-icon
-   
-    aria-hidden="false"
-    aria-label="Example home icon"
-    fontIcon="schedule"
-  ></mat-icon>
-  <button mat-flat-button (click)="generateMatrix()">
-    {{ isGenerating() ? 'Stop' : 'Start' }} Generation
-  </button></div>
-<div class="example-grid">
-<mat-grid-list cols="10" rowHeight="50px">
-  @for (cell of (displayGrid()); track $index) {
-  <mat-grid-tile>
-    {{ cell }}
-  </mat-grid-tile>
-  }
-</mat-grid-list>
-</div>
-<div class="badge-div">
-  <span
-    matBadge="Live"
-    matBadgeColor="warn"
-    matBadgePosition="before"
-    class="live-badge"
-    matBadgeSize="medium"
-    matBadgeOverlap="false"
-  >
-  </span>
-  <mat-form-field class="example-full-width" appearance="outline">
-    <mat-label>Your Code</mat-label>
-    <input matInput placeholder="Ex. a" value={{response.gridCode}} readonly="true" />
-  </mat-form-field>
+  </div>
 </div>

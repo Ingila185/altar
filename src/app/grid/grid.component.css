@@ -1,44 +1,96 @@
-.flex-grid {
+.grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f5f5f5;
+}
+
+.controls-section {
   display: flex;
   flex-direction: row;
-  gap: 5px;
-  justify-content: space-around;
-  align-items: baseline;
-  padding: 20px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.example-form {
-  min-width: 150px;
-  max-width: 500px;
+.form-wrapper {
+  flex-grow: 1;
+  min-width: 250px;
+}
+
+.full-width {
   width: 100%;
-  padding: 10px;
 }
 
-.example-full-width {
-  width: 50%;
-}
-
-
-mat-grid-tile {
-  border: 1px solid black;
-}
-
-.example-grid {
-  padding: 10px;
-}
-
-.demo-section + .demo-section {
-  margin-top: 16px;
-}
-.live-badge .mat-badge-content {
-  padding: 8px 8px; /* Adjust padding as needed */
-  font-size: 12px; /* Adjust font size as needed */
-}
-
-.badge-div {
+.action-section {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 16px;
+}
+
+.timer-icon {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.grid-display {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.grid-cell {
+  border: 1px solid #e0e0e0;
+  transition: background-color 0.3s ease;
+}
+
+.grid-cell:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.badge-section {
+  display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  gap: 16px;
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.live-badge .mat-badge-content {
+  padding: 8px 8px;
+  font-size: 12px;
+}
+
+.code-input {
+  width: 300px;
+}
+
+.wait-hint {
+  color: rgba(0, 0, 0, 0.6);
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .controls-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-section {
+    justify-content: space-between;
+    margin-top: 16px;
+  }
+
+  .badge-section {
+    flex-direction: column;
+  }
 }
